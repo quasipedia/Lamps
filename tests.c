@@ -84,9 +84,7 @@ void emrTest(void)
 	// The below numbers are slightly conservative figures, they run the chip within ~50mW
 	// of its maximum rating.
 	const int maxGSvalues[] = {1818, 1875, 1393, 1875, 1498, 1666, 2110};
-
-	// Turn off fading
-	setLedFadeSpeed(15, 4095);
+	const int maxSafeGSforAll = 1393;
 
 	// Turn all channels off
 	char channel;
@@ -95,8 +93,6 @@ void emrTest(void)
 		setLedBrightness(channelMap(channel), 0);
 	}
 
-	// Run the test
-
 	char chip;
 	char counter;
 
@@ -104,6 +100,10 @@ void emrTest(void)
 	pollButtons();
 	//	if (button[BUTTON_TEST].buttonState == PRESSED) {};
 
+	// Set slow fade-in
+	setLedFadeSpeed(15, 4095);
+
+	// First pass: all channels get lit ON progressively
 	for (chip = 0; chip < 7; chip++)
 	{
 		for (counter = 0; counter < 15; counter++)
@@ -118,7 +118,45 @@ void emrTest(void)
 			while(updateTlc5940() == 1);
 
 			// Wait
-			_delay_ms(500);
+			_delay_ms(300);
+		}
+	}
+
+	// Switch off fading
+	setLedFadeSpeed(4095, 4095);
+
+	// Second pass: all channels get lit ON progressively but they blink on and off
+	for (chip = 0; chip < 7; chip++)
+	{
+		for (counter = 0; counter < 15; counter++)
+		{
+			// Calculate channel number
+			channel = chip*16+counter;
+
+			// Turn ON all channels up to and including the present one
+			char i;
+			for (i = 0; i <= channel; i++)
+			{
+				setLedBrightness(channelMap(i), maxSafeGSforAll);
+			}
+
+			// Update the TLC
+			while(updateTlc5940() == 1);
+
+			// Wait
+			_delay_ms(150);
+
+			// Turn off all channels
+			for (channel = 0; channel <= 106; channel++)
+			{
+				setLedBrightness(channelMap(channel), 0);
+			}
+
+			// Update the TLC
+			while(updateTlc5940() == 1);
+
+			// Wait
+			_delay_ms(150);
 		}
 	}
 }
