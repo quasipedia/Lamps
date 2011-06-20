@@ -405,7 +405,7 @@ ISR(TIMER2_OVF_vect)
 	}
 
 	// Set the fade on and off speed for an LED
-	// Note: The fade speed is the amount of fade in one PWM period i.e. if PWM period is 60Hz
+	// Note: The fade speed is the amount of fade in one PWM period i.e. if PWM frequency is 60Hz
 	// 8 would be 'fade 8 units 60 times a second' - units are the brightness of 0-4095
 	void setLedFadeSpeed(int fadeOn, int fadeOff)
 	{

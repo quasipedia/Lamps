@@ -2,7 +2,7 @@
 	Chasy Clock.c
 
     Word Clock Firmware
-    Copyright (C) 2011 Simon Inns
+    Copyright (C) 2011 Simon Inns, Mac Ryan
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	Email: simon.inns@gmail.com
+	Email: simon.inns@gmail.com, quasipedia@gmail.com
 
 ************************************************************************/
 
@@ -31,6 +31,7 @@
 #include "ldr.h"
 #include "channelmap.h"
 #include "clockmap.h"
+#include "tests.h"
 #include <util/delay.h>
 
 // Note: Target is ATmega168-20
@@ -278,42 +279,13 @@ int main(void)
 		// Clock test state
 		if (clockState == STATE_CHASETEST)
 		{
-			int channel;
-			
-			// Set the led fading speed
-			setLedFadeSpeed(400, 200);
-	
-			// Turn all channels off
-			for (channel = 0; channel <= 106; channel++)
-			{
-				setLedBrightness(channelMap(channel), 0);
-			}
-			
-			// Run the chase pattern
-			for (channel = 0; channel <= 106; channel++)
-			{
-				// We have to poll the buttons here since we have suspended the state machine
-				pollButtons();
-				
-				if (channel != 15 && channel != 31 && channel != 47 && channel != 63 && channel != 79 && channel != 95)
-				{
-					// Current channel on
-					setLedBrightness(channelMap(channel), 4095);
-			
-					// Update the TLC
-					while(updateTlc5940() == 1);
-			
-					// Wait
-					for (unsigned int delay = 0; delay < 2; delay++) _delay_ms(100);
-			
-					// Channel off
-					setLedBrightness(channelMap(channel), 0);
-				}			
-			}
-			
+			// Perform the test
+			chaseTest();
+			emrTest();
+
 			// Set the led fading speed
 			setLedFadeSpeed(30, 100);
-			
+
 			// Go back to the clock running state
 			clockState = STATE_CLOCKRUNNING;
 		}
